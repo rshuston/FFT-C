@@ -7,6 +7,49 @@
 
 #include "fft.h"
 
+/* ===== __log2_u() ========================================================= */
+
+unsigned __log2_u(unsigned v);
+
+START_TEST (__log2_u_1)
+{
+    unsigned log = __log2_u(1);
+
+    ck_assert_uint_eq(log, 0);
+}
+END_TEST
+
+START_TEST (__log2_u_2)
+{
+    unsigned log = __log2_u(2);
+
+    ck_assert_uint_eq(log, 1);
+}
+END_TEST
+
+START_TEST (__log2_u_4)
+{
+    unsigned log = __log2_u(4);
+
+    ck_assert_uint_eq(log, 2);
+}
+END_TEST
+
+START_TEST (__log2_u_1024)
+{
+    unsigned log = __log2_u(1024);
+
+    ck_assert_uint_eq(log, 10);
+}
+END_TEST
+
+START_TEST (__log2_u_65536)
+{
+    unsigned log = __log2_u(65536);
+
+    ck_assert_uint_eq(log, 16);
+}
+END_TEST
 
 /* ===== fft_shuffle_f() ==================================================== */
 
@@ -387,12 +430,177 @@ END_TEST
 
 /* ===== fft_evaluate_f() =================================================== */
 
+START_TEST (fft_evaluate_f_performs_8pt_dft)
+{
+    complex_f f_t[8] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[8] = {
+        { 5.000000f , 0.000000f },
+        { 0.000000f , -2.414214f },
+        { 1.000000f , 0.000000f },
+        { 0.000000f , -0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 2.414214f }
+    };
+    complex_f data[8];
+    int i;
+
+    fft_copy_shuffle_f(f_t, data, 8);
+
+    fft_evaluate_f(data, 8);
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+START_TEST (fft_evaluate_f_performs_16pt_dft)
+{
+    complex_f f_t[16] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[16] = {
+        { 5.000000f , 0.000000f },
+        { 3.013670f , -3.013670f },
+        { 0.000000f , -2.414214f },
+        { -0.248303f , -0.248303f },
+        { 1.000000f , 0.000000f },
+        { 0.834089f , -0.834089f },
+        { 0.000000f , -0.414214f },
+        { 0.400544f , 0.400544f },
+        { 1.000000f , 0.000000f },
+        { 0.400544f , -0.400544f },
+        { -0.000000f , 0.414214f },
+        { 0.834089f , 0.834089f },
+        { 1.000000f , 0.000000f },
+        { -0.248303f , 0.248303f },
+        { -0.000000f , 2.414214f },
+        { 3.013670f , 3.013670f }
+    };
+    complex_f data[16];
+    int i;
+
+    fft_copy_shuffle_f(f_t, data, 16);
+
+    fft_evaluate_f(data, 16);
+
+    for (i = 0; i < 16; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
 
 /* ===== fft_f() ============================================================ */
 
-START_TEST (fft_r_does_something)
+START_TEST (fft_f_performs_32pt_inplace_DFT)
 {
-    ck_assert(1);
+    complex_f data[32] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[32] = {
+        { 5.000000f , 0.000000f },
+        { 4.443241f , -1.840451f },
+        { 3.013670f , -3.013670f },
+        { 1.311956f , -3.167342f },
+        { 0.000000f , -2.414214f },
+        { -0.515005f , -1.243333f },
+        { -0.248303f , -0.248303f },
+        { 0.422747f , 0.175108f },
+        { 1.000000f , 0.000000f },
+        { 1.143707f , -0.473739f },
+        { 0.834089f , -0.834089f },
+        { 0.335425f , -0.809787f },
+        { 0.000000f , -0.414214f },
+        { 0.039197f , 0.094631f },
+        { 0.400544f , 0.400544f },
+        { 0.818731f , 0.339130f },
+        { 1.000000f , 0.000000f },
+        { 0.818731f , -0.339130f },
+        { 0.400544f , -0.400544f },
+        { 0.039197f , -0.094631f },
+        { -0.000000f , 0.414214f },
+        { 0.335425f , 0.809787f },
+        { 0.834089f , 0.834089f },
+        { 1.143707f , 0.473739f },
+        { 1.000000f , 0.000000f },
+        { 0.422747f , -0.175108f },
+        { -0.248303f , 0.248303f },
+        { -0.515005f , 1.243333f },
+        { -0.000000f , 2.414214f },
+        { 1.311956f , 3.167342f },
+        { 3.013670f , 3.013670f },
+        { 4.443241f , 1.840451f }
+    };
+    int i;
+
+    fft_f(data, 32);
+
+    for (i = 0; i < 32; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
 }
 END_TEST
 
@@ -408,6 +616,12 @@ Suite * unit_test_suite(void)
     /* Core test case */
     tc_core = tcase_create("Core");
 
+    tcase_add_test(tc_core, __log2_u_1);
+    tcase_add_test(tc_core, __log2_u_2);
+    tcase_add_test(tc_core, __log2_u_4);
+    tcase_add_test(tc_core, __log2_u_1024);
+    tcase_add_test(tc_core, __log2_u_65536);
+
     tcase_add_test(tc_core, fft_shuffle_f_shuffles_four_values);
     tcase_add_test(tc_core, fft_shuffle_f_shuffles_eight_values);
     tcase_add_test(tc_core, fft_shuffle_f_shuffles_sixteen_values);
@@ -416,7 +630,10 @@ Suite * unit_test_suite(void)
     tcase_add_test(tc_core, fft_copy_shuffle_f_copies_eight_shuffled_values);
     tcase_add_test(tc_core, fft_copy_shuffle_f_copies_sixteen_shuffled_values);
 
-    tcase_add_test(tc_core, fft_r_does_something);
+    tcase_add_test(tc_core, fft_evaluate_f_performs_8pt_dft);
+    tcase_add_test(tc_core, fft_evaluate_f_performs_16pt_dft);
+
+    tcase_add_test(tc_core, fft_f_performs_32pt_inplace_DFT);
 
     suite_add_tcase(s, tc_core);
 

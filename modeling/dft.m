@@ -8,7 +8,7 @@ clear;
 # Allow for immediate printf output (good for debugging)
 more off;
 
-N = 15;
+N = 32;
 
 two_pi_N = 2 * pi / N;
 
@@ -105,3 +105,22 @@ set(gca(), "xgrid", "on", "ygrid", "on");
 set(gca(), "xtick", -max_F_W_mag : max_F_W_mag / 5 : max_F_W_mag);
 set(gca(), "ytick", -max_F_W_mag : max_F_W_mag / 5 : max_F_W_mag);
 title ("Complex plot of F(w)");
+
+
+filename = "dft-results.txt";
+fid = fopen (filename, "w");
+
+fprintf(fid, "complex_f f_t[%d] = {\n", N);
+for _k_ = [1 : N]
+    fprintf(fid, "    { %ff , 0.0f },\n", f_t(_k_));
+endfor
+fprintf(fid, "};\n");
+
+fprintf(fid, "complex_f F_w[%d] = {\n", N);
+for _k_ = [1 : N]
+    fprintf(fid, "    { %ff , %ff },\n", real(F_w(_k_)), imag(F_w(_k_)));
+endfor
+fprintf(fid, "};\n");
+
+fclose (fid);
+
