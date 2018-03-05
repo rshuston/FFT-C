@@ -7,50 +7,6 @@
 
 #include "fft.h"
 
-/* ===== __log2_u() ========================================================= */
-
-unsigned __log2_u(unsigned v);
-
-START_TEST (__log2_u_1)
-{
-    unsigned log = __log2_u(1);
-
-    ck_assert_uint_eq(log, 0);
-}
-END_TEST
-
-START_TEST (__log2_u_2)
-{
-    unsigned log = __log2_u(2);
-
-    ck_assert_uint_eq(log, 1);
-}
-END_TEST
-
-START_TEST (__log2_u_4)
-{
-    unsigned log = __log2_u(4);
-
-    ck_assert_uint_eq(log, 2);
-}
-END_TEST
-
-START_TEST (__log2_u_1024)
-{
-    unsigned log = __log2_u(1024);
-
-    ck_assert_uint_eq(log, 10);
-}
-END_TEST
-
-START_TEST (__log2_u_65536)
-{
-    unsigned log = __log2_u(65536);
-
-    ck_assert_uint_eq(log, 16);
-}
-END_TEST
-
 /* ===== fft_shuffle_f() ==================================================== */
 
 START_TEST (fft_shuffle_f_shuffles_four_values)
@@ -69,7 +25,7 @@ START_TEST (fft_shuffle_f_shuffles_four_values)
         { 4.f, -4.f}
     };
 
-    fft_shuffle_f(data, 4);
+    fft_shuffle_f(data, 2);  /* 2 = log2(4) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -109,7 +65,7 @@ START_TEST (fft_shuffle_f_shuffles_eight_values)
         { 8.f, -8.f}
     };
 
-    fft_shuffle_f(data, 8);
+    fft_shuffle_f(data, 3);  /* 3 = log2(8) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -177,7 +133,7 @@ START_TEST (fft_shuffle_f_shuffles_sixteen_values)
         { 16.f, -16.f}
     };
 
-    fft_shuffle_f(data, 16);
+    fft_shuffle_f(data, 4);  /* 4 = log2(16) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -254,7 +210,7 @@ START_TEST (fft_copy_shuffle_f_copies_four_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 4);
+    fft_copy_shuffle_f(src, dst, 2);  /* 2 = log2(4) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -301,7 +257,7 @@ START_TEST (fft_copy_shuffle_f_copies_eight_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 8);
+    fft_copy_shuffle_f(src, dst, 3);  /* 3 = log2(8) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -376,7 +332,7 @@ START_TEST (fft_copy_shuffle_f_copies_sixteen_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 16);
+    fft_copy_shuffle_f(src, dst, 4);  /* 4 = log2(16) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -455,9 +411,9 @@ START_TEST (fft_evaluate_f_performs_8pt_dft)
     complex_f data[8];
     int i;
 
-    fft_copy_shuffle_f(f_t, data, 8);
+    fft_copy_shuffle_f(f_t, data, 3);  /* 3 = log2(8) */
 
-    fft_evaluate_f(data, 8);
+    fft_evaluate_f(data, 3);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
@@ -508,9 +464,9 @@ START_TEST (fft_evaluate_f_performs_16pt_dft)
     complex_f data[16];
     int i;
 
-    fft_copy_shuffle_f(f_t, data, 16);
+    fft_copy_shuffle_f(f_t, data, 4);  /* 4 = log2(16) */
 
-    fft_evaluate_f(data, 16);
+    fft_evaluate_f(data, 4);  /* 4 = log2(16) */
 
     for (i = 0; i < 16; i++)
     {
@@ -594,7 +550,7 @@ START_TEST (fft_f_performs_32pt_inplace_DFT)
     };
     int i;
 
-    fft_f(data, 32);
+    fft_f(data, 5);  /* 5 = log2(32) */
 
     for (i = 0; i < 32; i++)
     {
@@ -615,12 +571,6 @@ Suite * unit_test_suite(void)
 
     /* Core test case */
     tc_core = tcase_create("Core");
-
-    tcase_add_test(tc_core, __log2_u_1);
-    tcase_add_test(tc_core, __log2_u_2);
-    tcase_add_test(tc_core, __log2_u_4);
-    tcase_add_test(tc_core, __log2_u_1024);
-    tcase_add_test(tc_core, __log2_u_65536);
 
     tcase_add_test(tc_core, fft_shuffle_f_shuffles_four_values);
     tcase_add_test(tc_core, fft_shuffle_f_shuffles_eight_values);

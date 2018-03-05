@@ -11,7 +11,7 @@ APP_TEST_SRC = $(APP_SRC:.c=_test.c)
 APP_TEST_OBJS =  $(APP_TEST_SRC:.c=.o)
 APP_TEST_EXES =  $(APP_TEST_SRC:.c=.exe)
 
-COMPONENT_DIRS = libcheckext libcomplex libfft
+COMPONENT_DIRS = libcheckext libbithacks libcomplex libfft
 COMPONENT_LIBS = $(foreach dir, $(COMPONENT_DIRS), $(dir)/$(dir).a)
 
 CFLAGS += $(addprefix -I, $(COMPONENT_DIRS))

@@ -4,33 +4,15 @@
 
 
 
-unsigned __log2_u(unsigned v)
+void fft_f(complex_f data[], unsigned log2_N)
 {
-    /*
-     * Ref:
-     * Sean Anderson's Bit Twiddling Hacks
-     * https://graphics.stanford.edu/~seander/bithacks.html
-     */
-
-    static const int _multiplyDeBruijnBitPosition[32] =
-    {
-        0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
-        31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-    };
-    unsigned r = _multiplyDeBruijnBitPosition[(unsigned)(v * 0x077CB531U) >> 27];
-
-    return r;
+    fft_shuffle_f(data, log2_N);
+    fft_evaluate_f(data, log2_N);
 }
 
 
-void fft_f(complex_f data[], int N)
-{
-    fft_shuffle_f(data, N);
-    fft_evaluate_f(data, N);
-}
 
-
-void fft_copy_shuffle_f(complex_f src[], complex_f dst[], int N)
+void fft_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
 {
     /*
      * Basic Bit-Reversal Scheme:
@@ -44,11 +26,11 @@ void fft_copy_shuffle_f(complex_f src[], complex_f dst[], int N)
      * have to flip a sequence of most-significant bits.
      */
 
-    unsigned n = N;         /* unsigned copy of N */
-    unsigned nd2 = n >> 1;  /* N/2 = number range midpoint */
-    unsigned nm1 = n - 1;   /* N-1 = digit mask */
-    unsigned i;             /* index for array elements */
-    unsigned j;             /* index for next element swap */
+    unsigned n = 1 << log2_N;   /* N */
+    unsigned nd2 = n >> 1;      /* N/2 = number range midpoint */
+    unsigned nm1 = n - 1;       /* N-1 = digit mask */
+    unsigned i;                 /* index for array elements */
+    unsigned j;                 /* index for next element swap */
 
     for (i = 0, j = 0; i < n; i++) {
         dst[j] = src[i];
@@ -84,7 +66,8 @@ void fft_copy_shuffle_f(complex_f src[], complex_f dst[], int N)
 }
 
 
-void fft_shuffle_f(complex_f data[], int N)
+
+void fft_shuffle_f(complex_f data[], unsigned log2_N)
 {
     /*
      * Basic Bit-Reversal Scheme:
@@ -98,11 +81,11 @@ void fft_shuffle_f(complex_f data[], int N)
      * have to flip a sequence of most-significant bits.
      */
 
-    unsigned n = N;         /* unsigned copy of N */
-    unsigned nd2 = n >> 1;  /* N/2 = number range midpoint */
-    unsigned nm1 = n - 1;   /* N-1 = digit mask */
-    unsigned i;             /* index for array elements */
-    unsigned j;             /* index for next element swap */
+    unsigned n = 1 << log2_N;   /* N */
+    unsigned nd2 = n >> 1;      /* N/2 = number range midpoint */
+    unsigned nm1 = n - 1;       /* N-1 = digit mask */
+    unsigned i;                 /* index for array elements */
+    unsigned j;                 /* index for next element swap */
 
     for (i = 0, j = 0; i < n; i++) {
         if (j > i) {
@@ -143,7 +126,7 @@ void fft_shuffle_f(complex_f data[], int N)
 
 
 
-void fft_evaluate_f(complex_f data[], int N)
+void fft_evaluate_f(complex_f data[], unsigned log2_N)
 {
     /*
      * In-place FFT butterfly algorithm
@@ -166,7 +149,7 @@ void fft_evaluate_f(complex_f data[], int N)
      *             Wmk = Wmk * Wm
      */
 
-    unsigned log2_N;
+    unsigned N;
     unsigned r;
     unsigned m, md2;
     unsigned n, k;
@@ -175,11 +158,11 @@ void fft_evaluate_f(complex_f data[], int N)
     complex_d Wm, Wmk;  /* Use double for precision */
     complex_d u, t;     /* Use double for precision */
 
-    log2_N = __log2_u(N);
+    N = 1 << log2_N;
     for (r = 1; r <= log2_N; r++)
     {
         m = 1 << r;
-        md2 = m / 2;
+        md2 = m >> 1;
         theta = - (2 * M_PI) / m;
         Wm.re = cos(theta);
         Wm.im = sin(theta);
