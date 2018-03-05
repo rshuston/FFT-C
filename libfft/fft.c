@@ -49,8 +49,8 @@ void fft_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
          * nd2 = n/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
          *     mszb = Nd2 / lszb
-         *          = 2^m / 2^n
-         *          = 2^(m-n)
+         *          = 2^m / 2^k
+         *          = 2^(m-k)
          *          = bit-reversed value of lszb
          */
 
@@ -108,8 +108,8 @@ void fft_shuffle_f(complex_f data[], unsigned log2_N)
          * nd2 = n/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
          *     mszb = Nd2 / lszb
-         *          = 2^m / 2^n
-         *          = 2^(m-n)
+         *          = 2^m / 2^k
+         *          = 2^(m-k)
          *          = bit-reversed value of lszb
          */
 
