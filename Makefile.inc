@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -g -Wall
 
 LD = gcc
-LDFLAGS =
+LDFLAGS = -lm
 TEST_LDFLAGS =
 
 AR = ar
@@ -20,6 +20,6 @@ VALGRIND = $(shell which valgrind)
 	$(CC) -c $(CFLAGS) $< -o $@ -MMD
 
 %_test.exe : %_test.o %.o
-	$(LD) $(LDFLAGS) $^ $(TEST_LDFLAGS) -o $@
+	$(LD) $^ $(LDFLAGS) $(TEST_LDFLAGS) -o $@
 
 .PRECIOUS: %.o

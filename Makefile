@@ -23,7 +23,7 @@ default: $(EXE)
 force:
 
 $(EXE): main.o $(APP_LIB) $(COMPONENT_LIBS)
-	$(LD) $(LDFLAGS) $^ -o $(EXE)
+	$(LD) $^ $(LDFLAGS) -o $(EXE)
 
 $(APP_LIB): $(APP_OBJS)
 	$(AR) $(ARFLAGS) $@ $^
@@ -32,7 +32,7 @@ $(COMPONENT_LIBS): force
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 app_test.exe: app_test.o $(APP_LIB) $(COMPONENT_LIBS)
-	$(LD) $(LDFLAGS) $^ $(TEST_LDFLAGS) -o $@
+	$(LD) $^ $(LDFLAGS) $(TEST_LDFLAGS) -o $@
 
 all: $(EXE) alltests
 
@@ -56,10 +56,12 @@ runallmemtests: runmemtests
 
 clean:
 	rm -f main.o main.d $(APP_OBJS) $(APP_OBJS:.o=.d) $(APP_TEST_OBJS) $(APP_TEST_OBJS:.o=.d)
+	rm -f foo.bar
 	@for d in $(COMPONENT_DIRS); do (cd $$d; $(MAKE) clean ); done
 
 clobber:
 	rm -f main.o main.d $(APP_OBJS) $(APP_OBJS:.o=.d) $(APP_TEST_OBJS) $(APP_TEST_OBJS:.o=.d)
+	rm -f foo.bar
 	rm -f $(APP_LIB) $(EXE) $(APP_TEST_EXES)
 	@for d in $(COMPONENT_DIRS); do (cd $$d; $(MAKE) clobber ); done
 
