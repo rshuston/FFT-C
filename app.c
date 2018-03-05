@@ -10,7 +10,7 @@
 #define INPUT_LINE_LENGTH   128
 
 
-static uint32_t _log2_u(uint32_t v);
+static unsigned _log2_u(unsigned v);
 
 
 int app_exec(int argc, char *argv[])
@@ -62,7 +62,7 @@ int app_exec(int argc, char *argv[])
 
 
 
-static uint32_t _log2_u(uint32_t v)
+static unsigned _log2_u(unsigned v)
 {
     int r;      // result goes here
 
@@ -78,7 +78,7 @@ static uint32_t _log2_u(uint32_t v)
     v |= v >> 8;
     v |= v >> 16;
 
-    r = MultiplyDeBruijnBitPosition[(uint32_t)(v * 0x07C4ACDDU) >> 27];
+    r = MultiplyDeBruijnBitPosition[(unsigned)(v * 0x07C4ACDDU) >> 27];
 
     return r;
 }
