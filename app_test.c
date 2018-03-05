@@ -5,7 +5,7 @@
 
 #include "app.h"
 
-#if 0
+#if 1
 #define CAPTURE_STDOUT
 #endif
 
@@ -75,22 +75,142 @@ static int _stdout_capture_retrieve(stdout_capture_t *output_capture, int size)
 
 /* ===== app_exec() ========================================================= */
 
-START_TEST (app_exec_does_something)
+START_TEST (app_exec_evaluates_8_points)
 {
     char    *exename;
     char    *filename;
     char    *argv[2];
     int     returnValue;
+#if defined(CAPTURE_STDOUT)
+    stdout_capture_t    output_capture;
+    char                *expected_stdout;
+    int                 expected_stdout_size;
+#endif
 
     exename = "app_test.exe";
     filename = "foo.bar";
 
+    FILE *fp;
+
+    if ( (fp = fopen(filename, "w")) != NULL )
+    {
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "0.0\n");
+        fprintf(fp, "0.0\n");
+        fprintf(fp, "0.0\n");
+
+        fclose(fp);
+    }
+
     argv[0] = exename;
     argv[1] = filename;
 
+#if defined(CAPTURE_STDOUT)
+    ck_assert( _stdout_capture_enable(&output_capture) );
+#endif
+
     returnValue = app_exec(2, argv);  /* 0 = success */
 
-    ck_assert_int_eq(returnValue, 1);
+#if defined(CAPTURE_STDOUT)
+    ck_assert( _stdout_capture_disable(&output_capture) );
+#endif
+
+    ck_assert_int_eq(returnValue, 0);
+
+#if defined(CAPTURE_STDOUT)
+    expected_stdout =
+    "[0] = { 5.000000 , 0.000000 }\n"
+    "[1] = { 0.000000 , -2.414214 }\n"
+    "[2] = { 1.000000 , 0.000000 }\n"
+    "[3] = { 0.000000 , -0.414214 }\n"
+    "[4] = { 1.000000 , 0.000000 }\n"
+    "[5] = { -0.000000 , 0.414214 }\n"
+    "[6] = { 1.000000 , 0.000000 }\n"
+    "[7] = { -0.000000 , 2.414214 }\n";
+    expected_stdout_size = strlen(expected_stdout);
+    if (expected_stdout_size > MAX_PIPED_BUFFER_SIZE)
+    {
+        expected_stdout_size = MAX_PIPED_BUFFER_SIZE;
+    }
+
+    ck_assert( _stdout_capture_retrieve(&output_capture, expected_stdout_size) );
+
+    ck_assert_str_eq(output_capture.captured_stdout, expected_stdout);
+#endif
+}
+END_TEST
+
+START_TEST (app_exec_evaluates_9_points_as_8_points)
+{
+    char    *exename;
+    char    *filename;
+    char    *argv[2];
+    int     returnValue;
+#if defined(CAPTURE_STDOUT)
+    stdout_capture_t    output_capture;
+    char                *expected_stdout;
+    int                 expected_stdout_size;
+#endif
+
+    exename = "app_test.exe";
+    filename = "foo.bar";
+
+    FILE *fp;
+
+    if ( (fp = fopen(filename, "w")) != NULL )
+    {
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "1.0\n");
+        fprintf(fp, "0.0\n");
+        fprintf(fp, "0.0\n");
+        fprintf(fp, "0.0\n");
+        fprintf(fp, "0.0\n"); /* 9th point */
+
+        fclose(fp);
+    }
+
+    argv[0] = exename;
+    argv[1] = filename;
+
+#if defined(CAPTURE_STDOUT)
+    ck_assert( _stdout_capture_enable(&output_capture) );
+#endif
+
+    returnValue = app_exec(2, argv);  /* 0 = success */
+
+#if defined(CAPTURE_STDOUT)
+    ck_assert( _stdout_capture_disable(&output_capture) );
+#endif
+
+    ck_assert_int_eq(returnValue, 0);
+
+#if defined(CAPTURE_STDOUT)
+    expected_stdout =
+    "[0] = { 5.000000 , 0.000000 }\n"
+    "[1] = { 0.000000 , -2.414214 }\n"
+    "[2] = { 1.000000 , 0.000000 }\n"
+    "[3] = { 0.000000 , -0.414214 }\n"
+    "[4] = { 1.000000 , 0.000000 }\n"
+    "[5] = { -0.000000 , 0.414214 }\n"
+    "[6] = { 1.000000 , 0.000000 }\n"
+    "[7] = { -0.000000 , 2.414214 }\n";
+    expected_stdout_size = strlen(expected_stdout);
+    if (expected_stdout_size > MAX_PIPED_BUFFER_SIZE)
+    {
+        expected_stdout_size = MAX_PIPED_BUFFER_SIZE;
+    }
+
+    ck_assert( _stdout_capture_retrieve(&output_capture, expected_stdout_size) );
+
+    ck_assert_str_eq(output_capture.captured_stdout, expected_stdout);
+#endif
 }
 END_TEST
 
@@ -106,7 +226,8 @@ Suite * unit_test_suite(void)
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, app_exec_does_something);
+    tcase_add_test(tc_core, app_exec_evaluates_8_points);
+    tcase_add_test(tc_core, app_exec_evaluates_9_points_as_8_points);
 
     suite_add_tcase(s, tc_core);
 
