@@ -482,15 +482,15 @@ START_TEST (ffti_f_performs_4pt_inplace_DFT)
 {
     complex_f data[4] = {
         { 1.0f , 0.0f },
-        { 0.0f , 0.0f },
-        { 0.0f , 0.0f },
-        { 0.0f , 0.0f }
+        { 2.0f , 0.0f },
+        { 3.0f , 0.0f },
+        { 4.0f , 0.0f }
     };
     complex_f expected_F_w[4] = {
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f }
+        { 10.0f , 0.0f },
+        { -2.0f , 2.0f },
+        { -2.0f , 0.0f },
+        { -2.0f , -2.0f }
     };
     int i;
 
@@ -627,15 +627,15 @@ START_TEST (fftr_f_performs_4pt_recursive_DFT)
 {
     complex_f data[4] = {
         { 1.0f , 0.0f },
-        { 0.0f , 0.0f },
-        { 0.0f , 0.0f },
-        { 0.0f , 0.0f }
+        { 2.0f , 0.0f },
+        { 3.0f , 0.0f },
+        { 4.0f , 0.0f }
     };
     complex_f expected_F_w[4] = {
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f },
-        { 1.0f , 0.0f }
+        { 10.0f , 0.0f },
+        { -2.0f , 2.0f },
+        { -2.0f , 0.0f },
+        { -2.0f , -2.0f }
     };
     int i;
 

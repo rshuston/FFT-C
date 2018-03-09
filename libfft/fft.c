@@ -195,7 +195,7 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
 
 
 
-static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stride)
+static void _fftr_f(complex_f v[], unsigned N)
 {
     /*
      * fft(v,N):
@@ -206,10 +206,12 @@ static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stri
      *         vo[k] = v[2*k+1]
      *     fft(ve, N/2)
      *     fft(vo, N/2);
+     *     WN = exp(−j2π/N)
+     *     WNk = 1
      *     for k = 0 to N/2-1
-     *         W = exp(−j2πk/N)
-     *         v[k]     = ve[k] + W * vo[k]
-     *         v[k+N/2] = ve[k] - W * vo[k]
+     *         v[k]     = ve[k] + WNk * vo[k]
+     *         v[k+N/2] = ve[k] - WNk * vo[k]
+     *         WNk = WNk * WN
      */
 
     if (N > 1)
@@ -217,10 +219,9 @@ static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stri
         unsigned Nd2;
         unsigned k;
         unsigned kpNd2;
+        complex_f *ve, *vo;
         double theta;
-        complex_f *ve;
-        complex_f *vo;
-        complex_d W;
+        complex_d WN, WNk;
         complex_d u, t;
 
         Nd2 = N >> 1;
@@ -230,28 +231,35 @@ static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stri
 
         for (k = 0; k < Nd2; k++)
         {
-            ve[k] = data[2*k];
-            vo[k] = data[2*k+1];
+            ve[k] = v[2*k];
+            vo[k] = v[2*k+1];
         }
 
-        _fftr_f(ve, Nd2, origin, 2 * stride);
-        _fftr_f(vo, Nd2, origin + stride, 2 * stride);
+        _fftr_f(ve, Nd2);
+        _fftr_f(vo, Nd2);
 
+        theta = - (2 * M_PI) / N;
+        WN.re = cos(theta);
+        WN.im = sin(theta);
+
+        WNk.re = 1.f;
+        WNk.im = 0.f;
         for (k = 0; k < Nd2; k++)
         {
             kpNd2 = k + Nd2;
 
-            theta = - 2 * M_PI * k / N;
-            W.re = cos(theta);
-            W.im = sin(theta);
             u.re = ve[k].re;
             u.im = ve[k].im;
-            t.re = complex_mul_re(W.re, W.im, vo[k].re, vo[k].im);
-            t.im = complex_mul_im(W.re, W.im, vo[k].re, vo[k].im);
-            data[k].re = u.re + t.re;
-            data[k].im = u.im + t.im;
-            data[kpNd2].re = u.re - t.re;
-            data[kpNd2].im = u.im - t.im;
+            t.re = complex_mul_re(WNk.re, WNk.im, vo[k].re, vo[k].im);
+            t.im = complex_mul_im(WNk.re, WNk.im, vo[k].re, vo[k].im);
+            v[k].re = u.re + t.re;
+            v[k].im = u.im + t.im;
+            v[kpNd2].re = u.re - t.re;
+            v[kpNd2].im = u.im - t.im;
+
+            t.re = complex_mul_re(WNk.re, WNk.im, WN.re, WN.im);
+            t.im = complex_mul_im(WNk.re, WNk.im, WN.re, WN.im);
+            WNk = t;
         }
 
         free(ve);
@@ -263,5 +271,5 @@ static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stri
 
 void fftr_f(complex_f data[], unsigned log2_N)
 {
-    _fftr_f(data, 1 << log2_N, 0, 1);
+    _fftr_f(data, 1 << log2_N);
 }
