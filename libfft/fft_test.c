@@ -7,9 +7,9 @@
 
 #include "fft.h"
 
-/* ===== fft_shuffle_f() ==================================================== */
+/* ===== ffti_shuffle_f() =================================================== */
 
-START_TEST (fft_shuffle_f_shuffles_four_values)
+START_TEST (ffti_shuffle_f_shuffles_four_values)
 {
     /*
      * 0: 00 -> 00 : 0
@@ -25,7 +25,7 @@ START_TEST (fft_shuffle_f_shuffles_four_values)
         { 4.f, -4.f}
     };
 
-    fft_shuffle_f(data, 2);  /* 2 = log2(4) */
+    ffti_shuffle_f(data, 2);  /* 2 = log2(4) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -41,7 +41,7 @@ START_TEST (fft_shuffle_f_shuffles_four_values)
 }
 END_TEST
 
-START_TEST (fft_shuffle_f_shuffles_eight_values)
+START_TEST (ffti_shuffle_f_shuffles_eight_values)
 {
     /*
      * 0: 000 -> 000 : 0
@@ -65,7 +65,7 @@ START_TEST (fft_shuffle_f_shuffles_eight_values)
         { 8.f, -8.f}
     };
 
-    fft_shuffle_f(data, 3);  /* 3 = log2(8) */
+    ffti_shuffle_f(data, 3);  /* 3 = log2(8) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -93,7 +93,7 @@ START_TEST (fft_shuffle_f_shuffles_eight_values)
 }
 END_TEST
 
-START_TEST (fft_shuffle_f_shuffles_sixteen_values)
+START_TEST (ffti_shuffle_f_shuffles_sixteen_values)
 {
     /*
      * 00: 0000 -> 0000 : 00
@@ -133,7 +133,7 @@ START_TEST (fft_shuffle_f_shuffles_sixteen_values)
         { 16.f, -16.f}
     };
 
-    fft_shuffle_f(data, 4);  /* 4 = log2(16) */
+    ffti_shuffle_f(data, 4);  /* 4 = log2(16) */
 
     ck_assert_flt_eq(data[0].re, 1.f);
     ck_assert_flt_eq(data[0].im, -1.f);
@@ -185,9 +185,9 @@ START_TEST (fft_shuffle_f_shuffles_sixteen_values)
 }
 END_TEST
 
-/* ===== fft_copy_shuffle_f() =============================================== */
+/* ===== ffti_copy_shuffle_f() ============================================== */
 
-START_TEST (fft_copy_shuffle_f_copies_four_shuffled_values)
+START_TEST (ffti_copy_shuffle_f_copies_four_shuffled_values)
 {
     /*
      * 0: 00 -> 00 : 0
@@ -210,7 +210,7 @@ START_TEST (fft_copy_shuffle_f_copies_four_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 2);  /* 2 = log2(4) */
+    ffti_copy_shuffle_f(src, dst, 2);  /* 2 = log2(4) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -226,7 +226,7 @@ START_TEST (fft_copy_shuffle_f_copies_four_shuffled_values)
 }
 END_TEST
 
-START_TEST (fft_copy_shuffle_f_copies_eight_shuffled_values)
+START_TEST (ffti_copy_shuffle_f_copies_eight_shuffled_values)
 {
     /*
      * 0: 000 -> 000 : 0
@@ -257,7 +257,7 @@ START_TEST (fft_copy_shuffle_f_copies_eight_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 3);  /* 3 = log2(8) */
+    ffti_copy_shuffle_f(src, dst, 3);  /* 3 = log2(8) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -285,7 +285,7 @@ START_TEST (fft_copy_shuffle_f_copies_eight_shuffled_values)
 }
 END_TEST
 
-START_TEST (fft_copy_shuffle_f_copies_sixteen_shuffled_values)
+START_TEST (ffti_copy_shuffle_f_copies_sixteen_shuffled_values)
 {
     /*
      * 00: 0000 -> 0000 : 00
@@ -332,7 +332,7 @@ START_TEST (fft_copy_shuffle_f_copies_sixteen_shuffled_values)
         dst[i] = src[i];
     }
 
-    fft_copy_shuffle_f(src, dst, 4);  /* 4 = log2(16) */
+    ffti_copy_shuffle_f(src, dst, 4);  /* 4 = log2(16) */
 
     ck_assert_flt_eq(dst[0].re, 1.f);
     ck_assert_flt_eq(dst[0].im, -1.f);
@@ -384,9 +384,9 @@ START_TEST (fft_copy_shuffle_f_copies_sixteen_shuffled_values)
 }
 END_TEST
 
-/* ===== fft_evaluate_f() =================================================== */
+/* ===== ffti_evaluate_f() ================================================== */
 
-START_TEST (fft_evaluate_f_performs_8pt_dft)
+START_TEST (ffti_evaluate_f_performs_8pt_dft)
 {
     complex_f f_t[8] = {
         { 1.000000f , 0.0f },
@@ -411,9 +411,9 @@ START_TEST (fft_evaluate_f_performs_8pt_dft)
     complex_f data[8];
     int i;
 
-    fft_copy_shuffle_f(f_t, data, 3);  /* 3 = log2(8) */
+    ffti_copy_shuffle_f(f_t, data, 3);  /* 3 = log2(8) */
 
-    fft_evaluate_f(data, 3);  /* 3 = log2(8) */
+    ffti_evaluate_f(data, 3);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
@@ -423,7 +423,7 @@ START_TEST (fft_evaluate_f_performs_8pt_dft)
 }
 END_TEST
 
-START_TEST (fft_evaluate_f_performs_16pt_dft)
+START_TEST (ffti_evaluate_f_performs_16pt_dft)
 {
     complex_f f_t[16] = {
         { 1.000000f , 0.0f },
@@ -464,9 +464,9 @@ START_TEST (fft_evaluate_f_performs_16pt_dft)
     complex_f data[16];
     int i;
 
-    fft_copy_shuffle_f(f_t, data, 4);  /* 4 = log2(16) */
+    ffti_copy_shuffle_f(f_t, data, 4);  /* 4 = log2(16) */
 
-    fft_evaluate_f(data, 4);  /* 4 = log2(16) */
+    ffti_evaluate_f(data, 4);  /* 4 = log2(16) */
 
     for (i = 0; i < 16; i++)
     {
@@ -476,9 +476,70 @@ START_TEST (fft_evaluate_f_performs_16pt_dft)
 }
 END_TEST
 
-/* ===== fft_f() ============================================================ */
+/* ===== ffti_f() =========================================================== */
 
-START_TEST (fft_f_performs_32pt_inplace_DFT)
+START_TEST (ffti_f_performs_4pt_inplace_DFT)
+{
+    complex_f data[4] = {
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f expected_F_w[4] = {
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f }
+    };
+    int i;
+
+    ffti_f(data, 2);  /* 2 = log2(4) */
+
+    for (i = 0; i < 4; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+
+START_TEST (ffti_f_performs_8pt_inplace_DFT)
+{
+    complex_f data[8] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[8] = {
+        { 5.000000f , 0.000000f },
+        { 0.000000f , -2.414214f },
+        { 1.000000f , 0.000000f },
+        { 0.000000f , -0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 2.414214f }
+    };
+    int i;
+
+    ffti_f(data, 3);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+START_TEST (ffti_f_performs_32pt_inplace_DFT)
 {
     complex_f data[32] = {
         { 1.000000f , 0.0f },
@@ -550,7 +611,151 @@ START_TEST (fft_f_performs_32pt_inplace_DFT)
     };
     int i;
 
-    fft_f(data, 5);  /* 5 = log2(32) */
+    ffti_f(data, 5);  /* 5 = log2(32) */
+
+    for (i = 0; i < 32; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+/* ===== fftr_f() =========================================================== */
+
+START_TEST (fftr_f_performs_4pt_recursive_DFT)
+{
+    complex_f data[4] = {
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f expected_F_w[4] = {
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f }
+    };
+    int i;
+
+    fftr_f(data, 2);  /* 2 = log2(4) */
+
+    for (i = 0; i < 4; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+START_TEST (fftr_f_performs_8pt_recursive_DFT)
+{
+    complex_f data[8] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[8] = {
+        { 5.000000f , 0.000000f },
+        { 0.000000f , -2.414214f },
+        { 1.000000f , 0.000000f },
+        { 0.000000f , -0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 0.414214f },
+        { 1.000000f , 0.000000f },
+        { -0.000000f , 2.414214f }
+    };
+    int i;
+
+    fftr_f(data, 3);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
+        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+    }
+}
+END_TEST
+
+START_TEST (fftr_f_performs_32pt_recursive_DFT)
+{
+    complex_f data[32] = {
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 1.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f },
+        { 0.000000f , 0.0f }
+    };
+    complex_f expected_F_w[32] = {
+        { 5.000000f , 0.000000f },
+        { 4.443241f , -1.840451f },
+        { 3.013670f , -3.013670f },
+        { 1.311956f , -3.167342f },
+        { 0.000000f , -2.414214f },
+        { -0.515005f , -1.243333f },
+        { -0.248303f , -0.248303f },
+        { 0.422747f , 0.175108f },
+        { 1.000000f , 0.000000f },
+        { 1.143707f , -0.473739f },
+        { 0.834089f , -0.834089f },
+        { 0.335425f , -0.809787f },
+        { 0.000000f , -0.414214f },
+        { 0.039197f , 0.094631f },
+        { 0.400544f , 0.400544f },
+        { 0.818731f , 0.339130f },
+        { 1.000000f , 0.000000f },
+        { 0.818731f , -0.339130f },
+        { 0.400544f , -0.400544f },
+        { 0.039197f , -0.094631f },
+        { -0.000000f , 0.414214f },
+        { 0.335425f , 0.809787f },
+        { 0.834089f , 0.834089f },
+        { 1.143707f , 0.473739f },
+        { 1.000000f , 0.000000f },
+        { 0.422747f , -0.175108f },
+        { -0.248303f , 0.248303f },
+        { -0.515005f , 1.243333f },
+        { -0.000000f , 2.414214f },
+        { 1.311956f , 3.167342f },
+        { 3.013670f , 3.013670f },
+        { 4.443241f , 1.840451f }
+    };
+    int i;
+
+    fftr_f(data, 5);  /* 5 = log2(32) */
 
     for (i = 0; i < 32; i++)
     {
@@ -572,18 +777,24 @@ Suite * unit_test_suite(void)
     /* Core test case */
     tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, fft_shuffle_f_shuffles_four_values);
-    tcase_add_test(tc_core, fft_shuffle_f_shuffles_eight_values);
-    tcase_add_test(tc_core, fft_shuffle_f_shuffles_sixteen_values);
+    tcase_add_test(tc_core, ffti_shuffle_f_shuffles_four_values);
+    tcase_add_test(tc_core, ffti_shuffle_f_shuffles_eight_values);
+    tcase_add_test(tc_core, ffti_shuffle_f_shuffles_sixteen_values);
 
-    tcase_add_test(tc_core, fft_copy_shuffle_f_copies_four_shuffled_values);
-    tcase_add_test(tc_core, fft_copy_shuffle_f_copies_eight_shuffled_values);
-    tcase_add_test(tc_core, fft_copy_shuffle_f_copies_sixteen_shuffled_values);
+    tcase_add_test(tc_core, ffti_copy_shuffle_f_copies_four_shuffled_values);
+    tcase_add_test(tc_core, ffti_copy_shuffle_f_copies_eight_shuffled_values);
+    tcase_add_test(tc_core, ffti_copy_shuffle_f_copies_sixteen_shuffled_values);
 
-    tcase_add_test(tc_core, fft_evaluate_f_performs_8pt_dft);
-    tcase_add_test(tc_core, fft_evaluate_f_performs_16pt_dft);
+    tcase_add_test(tc_core, ffti_evaluate_f_performs_8pt_dft);
+    tcase_add_test(tc_core, ffti_evaluate_f_performs_16pt_dft);
 
-    tcase_add_test(tc_core, fft_f_performs_32pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_4pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_8pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_32pt_inplace_DFT);
+
+    tcase_add_test(tc_core, fftr_f_performs_4pt_recursive_DFT);
+    tcase_add_test(tc_core, fftr_f_performs_8pt_recursive_DFT);
+    tcase_add_test(tc_core, fftr_f_performs_32pt_recursive_DFT);
 
     suite_add_tcase(s, tc_core);
 

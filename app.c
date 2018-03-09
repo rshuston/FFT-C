@@ -42,7 +42,7 @@ int app_exec(int argc, char *argv[])
             unsigned r = log2_u(size);
             unsigned N = 1 << r;
 
-            fft_f(data, r);
+            ffti_f(data, r);
 
             for (int i = 0; i < N; i++)
             {

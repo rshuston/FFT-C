@@ -2,17 +2,20 @@
 
 #include <math.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 
 
-void fft_f(complex_f data[], unsigned log2_N)
+
+void ffti_f(complex_f data[], unsigned log2_N)
 {
-    fft_shuffle_f(data, log2_N);
-    fft_evaluate_f(data, log2_N);
+    ffti_shuffle_f(data, log2_N);
+    ffti_evaluate_f(data, log2_N);
 }
 
 
 
-void fft_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
+void ffti_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
 {
     /*
      * Basic Bit-Reversal Scheme:
@@ -48,7 +51,7 @@ void fft_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
          * n = 2^r = 2^(2m)
          * nd2 = n/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
-         *     mszb = Nd2 / lszb
+         *     mszb = nd2 / lszb
          *          = 2^m / 2^k
          *          = 2^(m-k)
          *          = bit-reversed value of lszb
@@ -67,7 +70,7 @@ void fft_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
 
 
 
-void fft_shuffle_f(complex_f data[], unsigned log2_N)
+void ffti_shuffle_f(complex_f data[], unsigned log2_N)
 {
     /*
      * Basic Bit-Reversal Scheme:
@@ -107,7 +110,7 @@ void fft_shuffle_f(complex_f data[], unsigned log2_N)
          * n = 2^r = 2^(2m)
          * nd2 = n/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
-         *     mszb = Nd2 / lszb
+         *     mszb = nd2 / lszb
          *          = 2^m / 2^k
          *          = 2^(m-k)
          *          = bit-reversed value of lszb
@@ -126,7 +129,7 @@ void fft_shuffle_f(complex_f data[], unsigned log2_N)
 
 
 
-void fft_evaluate_f(complex_f data[], unsigned log2_N)
+void ffti_evaluate_f(complex_f data[], unsigned log2_N)
 {
     /*
      * In-place FFT butterfly algorithm
@@ -188,4 +191,77 @@ void fft_evaluate_f(complex_f data[], unsigned log2_N)
             }
         }
     }
+}
+
+
+
+static void _fftr_f(complex_f data[], unsigned N, unsigned origin, unsigned stride)
+{
+    /*
+     * fft(v,N):
+     *     if N == 1
+     *         return
+     *     for k = 0 to N/2-1
+     *         ve[k] = v[2*k]
+     *         vo[k] = v[2*k+1]
+     *     fft(ve, N/2)
+     *     fft(vo, N/2);
+     *     for k = 0 to N/2-1
+     *         W = exp(−j2πk/N)
+     *         v[k]     = ve[k] + W * vo[k]
+     *         v[k+N/2] = ve[k] - W * vo[k]
+     */
+
+    if (N > 1)
+    {
+        unsigned Nd2;
+        unsigned k;
+        unsigned kpNd2;
+        double theta;
+        complex_f *ve;
+        complex_f *vo;
+        complex_d W;
+        complex_d u, t;
+
+        Nd2 = N >> 1;
+
+        ve = malloc(Nd2 * sizeof(complex_f));
+        vo = malloc(Nd2 * sizeof(complex_f));
+
+        for (k = 0; k < Nd2; k++)
+        {
+            ve[k] = data[2*k];
+            vo[k] = data[2*k+1];
+        }
+
+        _fftr_f(ve, Nd2, origin, 2 * stride);
+        _fftr_f(vo, Nd2, origin + stride, 2 * stride);
+
+        for (k = 0; k < Nd2; k++)
+        {
+            kpNd2 = k + Nd2;
+
+            theta = - 2 * M_PI * k / N;
+            W.re = cos(theta);
+            W.im = sin(theta);
+            u.re = ve[k].re;
+            u.im = ve[k].im;
+            t.re = complex_mul_re(W.re, W.im, vo[k].re, vo[k].im);
+            t.im = complex_mul_im(W.re, W.im, vo[k].re, vo[k].im);
+            data[k].re = u.re + t.re;
+            data[k].im = u.im + t.im;
+            data[kpNd2].re = u.re - t.re;
+            data[kpNd2].im = u.im - t.im;
+        }
+
+        free(ve);
+        free(vo);
+    }
+}
+
+
+
+void fftr_f(complex_f data[], unsigned log2_N)
+{
+    _fftr_f(data, 1 << log2_N, 0, 1);
 }
