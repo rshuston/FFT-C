@@ -195,7 +195,7 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
 
 
 
-static void _fftr_f(complex_f v[], unsigned N)
+void fftr_f(complex_f data[], unsigned log2_N)
 {
     /*
      * fft(v,N):
@@ -214,8 +214,9 @@ static void _fftr_f(complex_f v[], unsigned N)
      *         WNk = WNk * WN
      */
 
-    if (N > 1)
+    if (log2_N > 0)
     {
+        unsigned log2_Nd2;
         unsigned Nd2;
         unsigned k;
         unsigned kpNd2;
@@ -224,21 +225,22 @@ static void _fftr_f(complex_f v[], unsigned N)
         complex_d WN, WNk;
         complex_d u, t;
 
-        Nd2 = N >> 1;
+        log2_Nd2 = log2_N - 1;
+        Nd2 = 1 << log2_Nd2;
 
         ve = malloc(Nd2 * sizeof(complex_f));
         vo = malloc(Nd2 * sizeof(complex_f));
 
         for (k = 0; k < Nd2; k++)
         {
-            ve[k] = v[2*k];
-            vo[k] = v[2*k+1];
+            ve[k] = data[2*k];
+            vo[k] = data[2*k+1];
         }
 
-        _fftr_f(ve, Nd2);
-        _fftr_f(vo, Nd2);
+        fftr_f(ve, log2_Nd2);
+        fftr_f(vo, log2_Nd2);
 
-        theta = - (2 * M_PI) / N;
+        theta = - M_PI / Nd2;  /* - (2 * M_PI) / N */
         WN.re = cos(theta);
         WN.im = sin(theta);
 
@@ -252,10 +254,10 @@ static void _fftr_f(complex_f v[], unsigned N)
             u.im = ve[k].im;
             t.re = complex_mul_re(WNk.re, WNk.im, vo[k].re, vo[k].im);
             t.im = complex_mul_im(WNk.re, WNk.im, vo[k].re, vo[k].im);
-            v[k].re = u.re + t.re;
-            v[k].im = u.im + t.im;
-            v[kpNd2].re = u.re - t.re;
-            v[kpNd2].im = u.im - t.im;
+            data[k].re = u.re + t.re;
+            data[k].im = u.im + t.im;
+            data[kpNd2].re = u.re - t.re;
+            data[kpNd2].im = u.im - t.im;
 
             t.re = complex_mul_re(WNk.re, WNk.im, WN.re, WN.im);
             t.im = complex_mul_im(WNk.re, WNk.im, WN.re, WN.im);
@@ -265,11 +267,4 @@ static void _fftr_f(complex_f v[], unsigned N)
         free(ve);
         free(vo);
     }
-}
-
-
-
-void fftr_f(complex_f data[], unsigned log2_N)
-{
-    _fftr_f(data, 1 << log2_N);
 }
