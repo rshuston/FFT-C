@@ -210,8 +210,8 @@ void fftr_f(complex_f data[], unsigned log2_N)
      *     if N == 1
      *         return
      *     for k = 0 to N/2-1
-     *         e[k] = v[2*k]
-     *         o[k] = v[2*k+1]
+     *         e[k] = A[2*k]
+     *         o[k] = A[2*k+1]
      *     fft(e, N/2)
      *     fft(o, N/2);
      *     WN = exp(−j2π/N)
@@ -229,9 +229,9 @@ void fftr_f(complex_f data[], unsigned log2_N)
         unsigned k;
         unsigned kpNd2;
         complex_f *evn, *odd;
-        double theta;
-        complex_d WN, WNk;
-        complex_d u, t;
+        double theta;       /* Use double for precision */
+        complex_d WN, WNk;  /* Use double for precision */
+        complex_d u, t;     /* Use double for precision */
 
         log2_Nd2 = log2_N - 1;
         Nd2 = 1 << log2_Nd2;
@@ -294,8 +294,8 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
      *     if N == 1
      *         return
      *     for k = 0 to N/2-1
-     *         e[k] = v[2*k]
-     *         o[k] = v[2*k+1]
+     *         e[k] = A[2*k]
+     *         o[k] = A[2*k+1]
      *     fft(e, N/2)
      *     fft(o, N/2);
      *     WN = exp(−j2π/N)
@@ -313,9 +313,9 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
         unsigned k;
         unsigned kpNd2;
         complex_f *evn, *odd;
-        double theta;
-        complex_d WN, WNk;
-        complex_d u, t;
+        double theta;       /* Use double for precision */
+        complex_d WN, WNk;  /* Use double for precision */
+        complex_d u, t;     /* Use double for precision */
 
         log2_Nd2 = log2_N - 1;
         Nd2 = 1 << log2_Nd2;
@@ -373,9 +373,9 @@ void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
         unsigned k;
         unsigned k_e, k_o;
         unsigned kd2, kpNd2;
-        double theta;
-        complex_d WN, WNk;
-        complex_d u, t;
+        double theta;       /* Use double for precision */
+        complex_d WN, WNk;  /* Use double for precision */
+        complex_d u, t;     /* Use double for precision */
 
         stride2 = 2 * stride;
 
