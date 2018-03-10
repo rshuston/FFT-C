@@ -7,6 +7,10 @@
 
 
 
+/* ===== In-Place FFT ======================================================= */
+
+
+
 void ffti_f(complex_f data[], unsigned log2_N)
 {
     ffti_shuffle_f(data, log2_N);
@@ -195,22 +199,26 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
 
 
 
+/* ===== Recursive FFT ====================================================== */
+
+
+
 void fftr_f(complex_f data[], unsigned log2_N)
 {
     /*
-     * fft(v,N):
+     * fft(A[],N):
      *     if N == 1
      *         return
      *     for k = 0 to N/2-1
-     *         ve[k] = v[2*k]
-     *         vo[k] = v[2*k+1]
-     *     fft(ve, N/2)
-     *     fft(vo, N/2);
+     *         e[k] = v[2*k]
+     *         o[k] = v[2*k+1]
+     *     fft(e, N/2)
+     *     fft(o, N/2);
      *     WN = exp(−j2π/N)
      *     WNk = 1
      *     for k = 0 to N/2-1
-     *         v[k]     = ve[k] + WNk * vo[k]
-     *         v[k+N/2] = ve[k] - WNk * vo[k]
+     *         A[k]     = e[k] + WNk * o[k]
+     *         A[k+N/2] = e[k] - WNk * o[k]
      *         WNk = WNk * WN
      */
 
@@ -220,7 +228,7 @@ void fftr_f(complex_f data[], unsigned log2_N)
         unsigned Nd2;
         unsigned k;
         unsigned kpNd2;
-        complex_f *ve, *vo;
+        complex_f *evn, *odd;
         double theta;
         complex_d WN, WNk;
         complex_d u, t;
@@ -228,17 +236,17 @@ void fftr_f(complex_f data[], unsigned log2_N)
         log2_Nd2 = log2_N - 1;
         Nd2 = 1 << log2_Nd2;
 
-        ve = malloc(Nd2 * sizeof(complex_f));
-        vo = malloc(Nd2 * sizeof(complex_f));
+        evn = malloc(Nd2 * sizeof(complex_f));
+        odd = malloc(Nd2 * sizeof(complex_f));
 
         for (k = 0; k < Nd2; k++)
         {
-            ve[k] = data[2*k];
-            vo[k] = data[2*k+1];
+            evn[k] = data[2*k];
+            odd[k] = data[2*k+1];
         }
 
-        fftr_f(ve, log2_Nd2);
-        fftr_f(vo, log2_Nd2);
+        fftr_f(evn, log2_Nd2);
+        fftr_f(odd, log2_Nd2);
 
         theta = - M_PI / Nd2;  /* - (2 * M_PI) / N */
         WN.re = cos(theta);
@@ -250,10 +258,10 @@ void fftr_f(complex_f data[], unsigned log2_N)
         {
             kpNd2 = k + Nd2;
 
-            u.re = ve[k].re;
-            u.im = ve[k].im;
-            t.re = complex_mul_re(WNk.re, WNk.im, vo[k].re, vo[k].im);
-            t.im = complex_mul_im(WNk.re, WNk.im, vo[k].re, vo[k].im);
+            u.re = evn[k].re;
+            u.im = evn[k].im;
+            t.re = complex_mul_re(WNk.re, WNk.im, odd[k].re, odd[k].im);
+            t.im = complex_mul_im(WNk.re, WNk.im, odd[k].re, odd[k].im);
             data[k].re = u.re + t.re;
             data[k].im = u.im + t.im;
             data[kpNd2].re = u.re - t.re;
@@ -264,7 +272,84 @@ void fftr_f(complex_f data[], unsigned log2_N)
             WNk = t;
         }
 
-        free(ve);
-        free(vo);
+        free(evn);
+        free(odd);
+    }
+}
+
+
+
+/* ===== Recursive FFT, user-supplied scratchpad buffer ===================== */
+
+
+
+void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
+{
+    /*
+     * fft(A[],N):
+     *     if N == 1
+     *         return
+     *     for k = 0 to N/2-1
+     *         e[k] = v[2*k]
+     *         o[k] = v[2*k+1]
+     *     fft(e, N/2)
+     *     fft(o, N/2);
+     *     WN = exp(−j2π/N)
+     *     WNk = 1
+     *     for k = 0 to N/2-1
+     *         A[k]     = e[k] + WNk * o[k]
+     *         A[k+N/2] = e[k] - WNk * o[k]
+     *         WNk = WNk * WN
+     */
+
+    if (log2_N > 0)
+    {
+        unsigned log2_Nd2;
+        unsigned Nd2;
+        unsigned k;
+        unsigned kpNd2;
+        complex_f *evn, *odd;
+        double theta;
+        complex_d WN, WNk;
+        complex_d u, t;
+
+        log2_Nd2 = log2_N - 1;
+        Nd2 = 1 << log2_Nd2;
+
+        evn = scratch;
+        odd = scratch + Nd2;
+
+        for (k = 0; k < Nd2; k++)
+        {
+            evn[k] = data[2*k];
+            odd[k] = data[2*k+1];
+        }
+
+        fftr_f(evn, log2_Nd2);
+        fftr_f(odd, log2_Nd2);
+
+        theta = - M_PI / Nd2;  /* - (2 * M_PI) / N */
+        WN.re = cos(theta);
+        WN.im = sin(theta);
+
+        WNk.re = 1.f;
+        WNk.im = 0.f;
+        for (k = 0; k < Nd2; k++)
+        {
+            kpNd2 = k + Nd2;
+
+            u.re = evn[k].re;
+            u.im = evn[k].im;
+            t.re = complex_mul_re(WNk.re, WNk.im, odd[k].re, odd[k].im);
+            t.im = complex_mul_im(WNk.re, WNk.im, odd[k].re, odd[k].im);
+            data[k].re = u.re + t.re;
+            data[k].im = u.im + t.im;
+            data[kpNd2].re = u.re - t.re;
+            data[kpNd2].im = u.im - t.im;
+
+            t.re = complex_mul_re(WNk.re, WNk.im, WN.re, WN.im);
+            t.im = complex_mul_im(WNk.re, WNk.im, WN.re, WN.im);
+            WNk = t;
+        }
     }
 }

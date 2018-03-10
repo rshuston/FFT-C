@@ -19,6 +19,9 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N);
 /* Recursive FFT */
 void fftr_f(complex_f data[], unsigned log2_N);
 
+/* Recursive FFT, user-supplied scratchpad buffer */
+void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[]);
+
 
 #ifdef __cplusplus
 }
