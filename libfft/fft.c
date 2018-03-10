@@ -283,6 +283,10 @@ void fftr_f(complex_f data[], unsigned log2_N)
 
 
 
+#if 0
+
+
+
 void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
 {
     /*
@@ -353,3 +357,76 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
         }
     }
 }
+
+
+
+#else
+
+
+
+/* A much more efficient version of the recursive FFT algorithm */
+void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
+{
+    if (stride < N)
+    {
+        unsigned stride2;
+        unsigned k;
+        unsigned k_e, k_o;
+        unsigned kd2, kpNd2;
+        double theta;
+        complex_d WN, WNk;
+        complex_d u, t;
+
+        stride2 = 2 * stride;
+
+        /* Notice that the order of data and scratch buffers is swapped! */
+        _fftrb_f(scratch         , data         , N, stride2);
+        _fftrb_f(scratch + stride, data + stride, N, stride2);
+
+        theta = - (stride2 * M_PI) / N;
+        WN.re = cos(theta);
+        WN.im = sin(theta);
+
+        WNk.re = 1.f;
+        WNk.im = 0.f;
+        for (k = 0; k < N; k += stride2)
+        {
+            k_e = k;
+            k_o = k + stride;
+            kd2 = k >> 1;
+            kpNd2 = (k + N) >> 1;
+
+            u.re = scratch[k_e].re;
+            u.im = scratch[k_e].im;
+            t.re = complex_mul_re(WNk.re, WNk.im, scratch[k_o].re, scratch[k_o].im);
+            t.im = complex_mul_im(WNk.re, WNk.im, scratch[k_o].re, scratch[k_o].im);
+
+            data[kd2].re   = u.re + t.re;
+            data[kd2].im   = u.im + t.im;
+            data[kpNd2].re = u.re - t.re;
+            data[kpNd2].im = u.im - t.im;
+
+            t.re = complex_mul_re(WNk.re, WNk.im, WN.re, WN.im);
+            t.im = complex_mul_im(WNk.re, WNk.im, WN.re, WN.im);
+            WNk = t;
+        }
+    }
+}
+
+
+
+void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
+{
+    unsigned N;
+    unsigned k;
+
+    N = 1 << log2_N;
+    for (k = 0; k < N; k++)
+        scratch[k] = data[k];
+
+    _fftrb_f(data, scratch, N, 1);
+}
+
+
+
+#endif
