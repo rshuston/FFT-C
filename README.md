@@ -12,3 +12,8 @@ The baseline development environment is as follows:
 * The libcheck (https://github.com/libcheck/check) testing framework is used for unit testing.
 
 Other development environments are certainly suitable (e.g., Xcode, Eclipse, etc.) but the project must build and run in the baseline environment specified above.
+
+Currently, there are three FFT approaches implemented:
+1. In-place iterative solution
+2. Recursive solution with even/odd vector buffers (this is what naturally implements the Cooley-Tukey equations)
+3. Recursive solution with user-supplied scratchpad buffer
