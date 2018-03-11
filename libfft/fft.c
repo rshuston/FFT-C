@@ -287,6 +287,11 @@ void fftr_f(complex_f data[], unsigned log2_N)
 
 
 
+/*
+ * A more efficient version of the fftr_f() implementation, where a
+ * user-supplied buffer is used to hold the even/odd decompositions
+ */
+
 void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
 {
     /*
@@ -364,7 +369,12 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
 
 
 
-/* A much more efficient version of the recursive FFT algorithm */
+/*
+ * A much more efficient version of the recursive FFT algorithm, where
+ * the data and scratch buffers are commutated throughout the recursion
+ * sequence, and index mapping is used to locate the correct values
+ */
+
 void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
 {
     if (stride < N)
