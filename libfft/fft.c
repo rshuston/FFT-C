@@ -33,13 +33,13 @@ void ffti_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
      * have to flip a sequence of most-significant bits.
      */
 
-    unsigned n = 1 << log2_N;   /* N */
-    unsigned nd2 = n >> 1;      /* N/2 = number range midpoint */
-    unsigned nm1 = n - 1;       /* N-1 = digit mask */
-    unsigned i;                 /* index for array elements */
-    unsigned j;                 /* index for next element swap */
+    unsigned N = 1 << log2_N;   /* N */
+    unsigned Nd2 = N >> 1;      /* N/2 = number range midpoint */
+    unsigned Nm1 = N - 1;       /* N-1 = digit mask */
+    unsigned i;                 /* index for source element */
+    unsigned j;                 /* index for next destination element */
 
-    for (i = 0, j = 0; i < n; i++) {
+    for (i = 0, j = 0; i < N; i++) {
         dst[j] = src[i];
 
         /*
@@ -52,23 +52,23 @@ void ffti_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
          * Use division to bit-reverse the single bit so that we now have
          * the most significant zero bit
          *
-         * n = 2^r = 2^(2m)
-         * nd2 = n/2 = 2^m
+         * N = 2^r = 2^(2m)
+         * Nd2 = N/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
-         *     mszb = nd2 / lszb
+         *     mszb = Nd2 / lszb
          *          = 2^m / 2^k
          *          = 2^(m-k)
          *          = bit-reversed value of lszb
          */
 
-        unsigned mszb = nd2 / lszb;
+        unsigned mszb = Nd2 / lszb;
 
         /*
          * Toggle bits with bit-reverse mask
          */
 
-        unsigned m = nm1 & ~(mszb - 1);
-        j ^= m;
+        unsigned bits = Nm1 & ~(mszb - 1);
+        j ^= bits;
     }
 }
 
@@ -88,13 +88,13 @@ void ffti_shuffle_f(complex_f data[], unsigned log2_N)
      * have to flip a sequence of most-significant bits.
      */
 
-    unsigned n = 1 << log2_N;   /* N */
-    unsigned nd2 = n >> 1;      /* N/2 = number range midpoint */
-    unsigned nm1 = n - 1;       /* N-1 = digit mask */
+    unsigned N = 1 << log2_N;   /* N */
+    unsigned Nd2 = N >> 1;      /* N/2 = number range midpoint */
+    unsigned Nm1 = N - 1;       /* N-1 = digit mask */
     unsigned i;                 /* index for array elements */
-    unsigned j;                 /* index for next element swap */
+    unsigned j;                 /* index for next element swap location */
 
-    for (i = 0, j = 0; i < n; i++) {
+    for (i = 0, j = 0; i < N; i++) {
         if (j > i) {
             complex_f tmp = data[i];
             data[i] = data[j];
@@ -111,23 +111,23 @@ void ffti_shuffle_f(complex_f data[], unsigned log2_N)
          * Use division to bit-reverse the single bit so that we now have
          * the most significant zero bit
          *
-         * n = 2^r = 2^(2m)
-         * nd2 = n/2 = 2^m
+         * N = 2^r = 2^(2m)
+         * Nd2 = N/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
-         *     mszb = nd2 / lszb
+         *     mszb = Nd2 / lszb
          *          = 2^m / 2^k
          *          = 2^(m-k)
          *          = bit-reversed value of lszb
          */
 
-        unsigned mszb = nd2 / lszb;
+        unsigned mszb = Nd2 / lszb;
 
         /*
          * Toggle bits with bit-reverse mask
          */
 
-        unsigned m = nm1 & ~(mszb - 1);
-        j ^= m;
+        unsigned bits = Nm1 & ~(mszb - 1);
+        j ^= bits;
     }
 }
 
