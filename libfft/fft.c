@@ -11,10 +11,10 @@
 
 
 
-void ffti_f(complex_f data[], unsigned log2_N)
+void ffti_f(complex_f data[], unsigned log2_N, fft_dir direction)
 {
     ffti_shuffle_f(data, log2_N);
-    ffti_evaluate_f(data, log2_N);
+    ffti_evaluate_f(data, log2_N, direction);
 }
 
 
@@ -133,7 +133,7 @@ void ffti_shuffle_f(complex_f data[], unsigned log2_N)
 
 
 
-void ffti_evaluate_f(complex_f data[], unsigned log2_N)
+void ffti_evaluate_f(complex_f data[], unsigned log2_N, fft_dir direction)
 {
     /*
      * In-place FFT butterfly algorithm
@@ -154,6 +154,8 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
      *             A[n + k]       = u + t
      *             A[n + k + m/2] = u - t
      *             Wmk = Wmk * Wm
+     *
+     * For inverse FFT, use Wm = exp(+j2π/m)
      */
 
     unsigned N;
@@ -161,16 +163,20 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
     unsigned m, md2;
     unsigned n, k;
     unsigned i_e, i_o;
+    double theta_2pi;
     double theta;       /* Use double for precision */
     complex_d Wm, Wmk;  /* Use double for precision */
     complex_d u, t;     /* Use double for precision */
 
     N = 1 << log2_N;
+    theta_2pi = (direction == FFT_FORWARD) ? -M_PI : M_PI;
+    theta_2pi *= 2;
+
     for (r = 1; r <= log2_N; r++)
     {
         m = 1 << r;
         md2 = m >> 1;
-        theta = - (2 * M_PI) / m;
+        theta = theta_2pi / m;
         Wm.re = cos(theta);
         Wm.im = sin(theta);
         for (n = 0; n < N; n += m)
@@ -203,10 +209,10 @@ void ffti_evaluate_f(complex_f data[], unsigned log2_N)
 
 
 
-void fftr_f(complex_f data[], unsigned log2_N)
+void fftr_f(complex_f data[], unsigned log2_N, fft_dir direction)
 {
     /*
-     * fft(A[],N):
+     * fft(A[], N):
      *     if N == 1
      *         return
      *     for k = 0 to N/2-1
@@ -220,6 +226,8 @@ void fftr_f(complex_f data[], unsigned log2_N)
      *         A[k]     = e[k] + WNk * o[k]
      *         A[k+N/2] = e[k] - WNk * o[k]
      *         WNk = WNk * WN
+     *
+     * For inverse FFT, use Wm = exp(+j2π/N)
      */
 
     if (log2_N > 0)
@@ -229,6 +237,7 @@ void fftr_f(complex_f data[], unsigned log2_N)
         unsigned k;
         unsigned kpNd2;
         complex_f *evn, *odd;
+        double theta_pi;
         double theta;       /* Use double for precision */
         complex_d WN, WNk;  /* Use double for precision */
         complex_d u, t;     /* Use double for precision */
@@ -245,10 +254,11 @@ void fftr_f(complex_f data[], unsigned log2_N)
             odd[k] = data[2*k+1];
         }
 
-        fftr_f(evn, log2_Nd2);
-        fftr_f(odd, log2_Nd2);
+        fftr_f(evn, log2_Nd2, direction);
+        fftr_f(odd, log2_Nd2, direction);
 
-        theta = - M_PI / Nd2;  /* - (2 * M_PI) / N */
+        theta_pi = (direction == FFT_FORWARD) ? -M_PI : M_PI;
+        theta = theta_pi / Nd2;  /* - (2 * M_PI) / N */
         WN.re = cos(theta);
         WN.im = sin(theta);
 
@@ -292,10 +302,10 @@ void fftr_f(complex_f data[], unsigned log2_N)
  * user-supplied buffer is used to hold the even/odd decompositions
  */
 
-void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
+void fftrb_f(complex_f data[], unsigned log2_N, fft_dir direction, complex_f scratch[])
 {
     /*
-     * fft(A[],N):
+     * fft(A[], N):
      *     if N == 1
      *         return
      *     for k = 0 to N/2-1
@@ -309,6 +319,8 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
      *         A[k]     = e[k] + WNk * o[k]
      *         A[k+N/2] = e[k] - WNk * o[k]
      *         WNk = WNk * WN
+     *
+     * For inverse FFT, use Wm = exp(+j2π/N)
      */
 
     if (log2_N > 0)
@@ -318,6 +330,7 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
         unsigned k;
         unsigned kpNd2;
         complex_f *evn, *odd;
+        double theta_pi;
         double theta;       /* Use double for precision */
         complex_d WN, WNk;  /* Use double for precision */
         complex_d u, t;     /* Use double for precision */
@@ -334,10 +347,11 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
             odd[k] = data[2*k+1];
         }
 
-        fftr_f(evn, log2_Nd2);
-        fftr_f(odd, log2_Nd2);
+        fftr_f(evn, log2_Nd2, direction);
+        fftr_f(odd, log2_Nd2, direction);
 
-        theta = - M_PI / Nd2;  /* - (2 * M_PI) / N */
+        theta_pi = (direction == FFT_FORWARD) ? -M_PI : M_PI;
+        theta = theta_pi / Nd2;  /* - (2 * M_PI) / N */
         WN.re = cos(theta);
         WN.im = sin(theta);
 
@@ -375,7 +389,7 @@ void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
  * sequence, and index mapping is used to locate the correct values
  */
 
-void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
+void _fftrb_f(complex_f data[], complex_f scratch[], int N, double theta_pi, int stride)
 {
     if (stride < N)
     {
@@ -390,10 +404,10 @@ void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
         stride2 = 2 * stride;
 
         /* Notice that the order of data and scratch buffers is swapped! */
-        _fftrb_f(scratch         , data         , N, stride2);
-        _fftrb_f(scratch + stride, data + stride, N, stride2);
+        _fftrb_f(scratch         , data         , N, theta_pi, stride2);
+        _fftrb_f(scratch + stride, data + stride, N, theta_pi, stride2);
 
-        theta = - (stride2 * M_PI) / N;
+        theta = (stride2 * theta_pi) / N;
         WN.re = cos(theta);
         WN.im = sin(theta);
 
@@ -425,16 +439,19 @@ void _fftrb_f(complex_f data[], complex_f scratch[], int N, int stride)
 
 
 
-void fftrb_f(complex_f data[], unsigned log2_N, complex_f scratch[])
+void fftrb_f(complex_f data[], unsigned log2_N, fft_dir direction, complex_f scratch[])
 {
     unsigned N;
     unsigned k;
+    double theta_pi;
 
     N = 1 << log2_N;
     for (k = 0; k < N; k++)
         scratch[k] = data[k];
 
-    _fftrb_f(data, scratch, N, 1);
+    theta_pi = (direction == FFT_FORWARD) ? -M_PI : M_PI;
+
+    _fftrb_f(data, scratch, N, theta_pi, 1);
 }
 
 

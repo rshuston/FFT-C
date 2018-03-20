@@ -7,6 +7,12 @@
 
 #include "fft.h"
 
+
+
+#define FLOAT_EQ_TOLERANCE 1.0e-5
+
+
+
 /* ===== ffti_shuffle_f() =================================================== */
 
 START_TEST (ffti_shuffle_f_shuffles_four_values)
@@ -389,36 +395,73 @@ END_TEST
 START_TEST (ffti_evaluate_f_performs_8pt_dft)
 {
     complex_f f_t[8] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[8] = {
-        { 5.000000f , 0.000000f },
-        { 0.000000f , -2.414214f },
-        { 1.000000f , 0.000000f },
-        { 0.000000f , -0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 2.414214f }
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
     };
     complex_f data[8];
     int i;
 
     ffti_copy_shuffle_f(f_t, data, 3);  /* 3 = log2(8) */
 
-    ffti_evaluate_f(data, 3);  /* 3 = log2(8) */
+    ffti_evaluate_f(data, 3, FFT_FORWARD);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (ffti_evaluate_f_performs_8pt_inverse_dft)
+{
+    complex_f F_w[8] = {
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
+    };
+    complex_f expected_f_t_N[8] = {
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f data[8];
+    int i;
+
+    ffti_copy_shuffle_f(F_w, data, 3);  /* 3 = log2(8) */
+
+    ffti_evaluate_f(data, 3, FFT_INVERSE);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -426,22 +469,22 @@ END_TEST
 START_TEST (ffti_evaluate_f_performs_16pt_dft)
 {
     complex_f f_t[16] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[16] = {
         { 5.000000f , 0.000000f },
@@ -454,11 +497,11 @@ START_TEST (ffti_evaluate_f_performs_16pt_dft)
         { 0.400544f , 0.400544f },
         { 1.000000f , 0.000000f },
         { 0.400544f , -0.400544f },
-        { -0.000000f , 0.414214f },
+        { 0.000000f , 0.414214f },
         { 0.834089f , 0.834089f },
         { 1.000000f , 0.000000f },
         { -0.248303f , 0.248303f },
-        { -0.000000f , 2.414214f },
+        { 0.000000f , 2.414214f },
         { 3.013670f , 3.013670f }
     };
     complex_f data[16];
@@ -466,12 +509,65 @@ START_TEST (ffti_evaluate_f_performs_16pt_dft)
 
     ffti_copy_shuffle_f(f_t, data, 4);  /* 4 = log2(16) */
 
-    ffti_evaluate_f(data, 4);  /* 4 = log2(16) */
+    ffti_evaluate_f(data, 4, FFT_FORWARD);  /* 4 = log2(16) */
 
     for (i = 0; i < 16; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (ffti_evaluate_f_performs_16pt_inverse_dft)
+{
+    complex_f F_w[16] = {
+        { 5.000000f , 0.000000f },
+        { 3.013670f , -3.013670f },
+        { 0.000000f , -2.414214f },
+        { -0.248303f , -0.248303f },
+        { 1.000000f , 0.000000f },
+        { 0.834089f , -0.834089f },
+        { 0.000000f , -0.414214f },
+        { 0.400544f , 0.400544f },
+        { 1.000000f , 0.000000f },
+        { 0.400544f , -0.400544f },
+        { 0.000000f , 0.414214f },
+        { 0.834089f , 0.834089f },
+        { 1.000000f , 0.000000f },
+        { -0.248303f , 0.248303f },
+        { 0.000000f , 2.414214f },
+        { 3.013670f , 3.013670f }
+    };
+    complex_f expected_f_t_N[16] = {
+        { 16.0f , 0.0f },
+        { 16.0f , 0.0f },
+        { 16.0f , 0.0f },
+        { 16.0f , 0.0f },
+        { 16.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f data[16];
+    int i;
+
+    ffti_copy_shuffle_f(F_w, data, 4);  /* 4 = log2(16) */
+
+    ffti_evaluate_f(data, 4, FFT_INVERSE);  /* 4 = log2(16) */
+
+    for (i = 0; i < 16; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -494,47 +590,106 @@ START_TEST (ffti_f_performs_4pt_inplace_DFT)
     };
     int i;
 
-    ffti_f(data, 2);  /* 2 = log2(4) */
+    ffti_f(data, 2, FFT_FORWARD);  /* 2 = log2(4) */
 
     for (i = 0; i < 4; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
 
+START_TEST (ffti_f_performs_4pt_inplace_inverse_DFT)
+{
+    complex_f data[4] = {
+        { 10.0f , 0.0f },
+        { -2.0f , 2.0f },
+        { -2.0f , 0.0f },
+        { -2.0f , -2.0f }
+    };
+    complex_f expected_f_t_N[4] = {
+        { 4.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 12.0f , 0.0f },
+        { 16.0f , 0.0f }
+    };
+    int i;
+
+    ffti_f(data, 2, FFT_INVERSE);  /* 2 = log2(4) */
+
+    for (i = 0; i < 4; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
 
 START_TEST (ffti_f_performs_8pt_inplace_DFT)
 {
     complex_f data[8] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[8] = {
-        { 5.000000f , 0.000000f },
-        { 0.000000f , -2.414214f },
-        { 1.000000f , 0.000000f },
-        { 0.000000f , -0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 2.414214f }
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
     };
     int i;
 
-    ffti_f(data, 3);  /* 3 = log2(8) */
+    ffti_f(data, 3, FFT_FORWARD);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (ffti_f_performs_8pt_inplace_inverse_DFT)
+{
+    complex_f data[8] = {
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
+    };
+    complex_f expected_f_t_N[8] = {
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    int i;
+
+    ffti_f(data, 3, FFT_INVERSE);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -542,38 +697,38 @@ END_TEST
 START_TEST (ffti_f_performs_32pt_inplace_DFT)
 {
     complex_f data[32] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[32] = {
         { 5.000000f , 0.000000f },
@@ -596,7 +751,7 @@ START_TEST (ffti_f_performs_32pt_inplace_DFT)
         { 0.818731f , -0.339130f },
         { 0.400544f , -0.400544f },
         { 0.039197f , -0.094631f },
-        { -0.000000f , 0.414214f },
+        { 0.000000f , 0.414214f },
         { 0.335425f , 0.809787f },
         { 0.834089f , 0.834089f },
         { 1.143707f , 0.473739f },
@@ -604,19 +759,101 @@ START_TEST (ffti_f_performs_32pt_inplace_DFT)
         { 0.422747f , -0.175108f },
         { -0.248303f , 0.248303f },
         { -0.515005f , 1.243333f },
-        { -0.000000f , 2.414214f },
+        { 0.000000f , 2.414214f },
         { 1.311956f , 3.167342f },
         { 3.013670f , 3.013670f },
         { 4.443241f , 1.840451f }
     };
     int i;
 
-    ffti_f(data, 5);  /* 5 = log2(32) */
+    ffti_f(data, 5, FFT_FORWARD);  /* 5 = log2(32) */
 
     for (i = 0; i < 32; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (ffti_f_performs_32pt_inplace_inverse_DFT)
+{
+    complex_f data[32] = {
+        { 5.000000f , 0.000000f },
+        { 4.443241f , -1.840451f },
+        { 3.013670f , -3.013670f },
+        { 1.311956f , -3.167342f },
+        { 0.000000f , -2.414214f },
+        { -0.515005f , -1.243333f },
+        { -0.248303f , -0.248303f },
+        { 0.422747f , 0.175108f },
+        { 1.000000f , 0.000000f },
+        { 1.143707f , -0.473739f },
+        { 0.834089f , -0.834089f },
+        { 0.335425f , -0.809787f },
+        { 0.000000f , -0.414214f },
+        { 0.039197f , 0.094631f },
+        { 0.400544f , 0.400544f },
+        { 0.818731f , 0.339130f },
+        { 1.000000f , 0.000000f },
+        { 0.818731f , -0.339130f },
+        { 0.400544f , -0.400544f },
+        { 0.039197f , -0.094631f },
+        { 0.000000f , 0.414214f },
+        { 0.335425f , 0.809787f },
+        { 0.834089f , 0.834089f },
+        { 1.143707f , 0.473739f },
+        { 1.000000f , 0.000000f },
+        { 0.422747f , -0.175108f },
+        { -0.248303f , 0.248303f },
+        { -0.515005f , 1.243333f },
+        { 0.000000f , 2.414214f },
+        { 1.311956f , 3.167342f },
+        { 3.013670f , 3.013670f },
+        { 4.443241f , 1.840451f }
+    };
+    complex_f expected_f_t_N[32] = {
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    int i;
+
+    ffti_f(data, 5, FFT_INVERSE);  /* 5 = log2(32) */
+
+    for (i = 0; i < 32; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -639,12 +876,38 @@ START_TEST (fftr_f_performs_4pt_recursive_DFT)
     };
     int i;
 
-    fftr_f(data, 2);  /* 2 = log2(4) */
+    fftr_f(data, 2, FFT_FORWARD);  /* 2 = log2(4) */
 
     for (i = 0; i < 4; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftr_f_performs_4pt_recursive_inverse_DFT)
+{
+    complex_f data[4] = {
+        { 10.0f , 0.0f },
+        { -2.0f , 2.0f },
+        { -2.0f , 0.0f },
+        { -2.0f , -2.0f }
+    };
+    complex_f expected_f_t_N[4] = {
+        { 4.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 12.0f , 0.0f },
+        { 16.0f , 0.0f }
+    };
+    int i;
+
+    fftr_f(data, 2, FFT_INVERSE);  /* 2 = log2(4) */
+
+    for (i = 0; i < 4; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -652,33 +915,67 @@ END_TEST
 START_TEST (fftr_f_performs_8pt_recursive_DFT)
 {
     complex_f data[8] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[8] = {
-        { 5.000000f , 0.000000f },
-        { 0.000000f , -2.414214f },
-        { 1.000000f , 0.000000f },
-        { 0.000000f , -0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 2.414214f }
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
     };
     int i;
 
-    fftr_f(data, 3);  /* 3 = log2(8) */
+    fftr_f(data, 3, FFT_FORWARD);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftr_f_performs_8pt_recursive_inverse_DFT)
+{
+    complex_f data[8] = {
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
+    };
+    complex_f expected_f_t_N[8] = {
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    int i;
+
+    fftr_f(data, 3, FFT_INVERSE);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -686,38 +983,38 @@ END_TEST
 START_TEST (fftr_f_performs_32pt_recursive_DFT)
 {
     complex_f data[32] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[32] = {
         { 5.000000f , 0.000000f },
@@ -740,7 +1037,7 @@ START_TEST (fftr_f_performs_32pt_recursive_DFT)
         { 0.818731f , -0.339130f },
         { 0.400544f , -0.400544f },
         { 0.039197f , -0.094631f },
-        { -0.000000f , 0.414214f },
+        { 0.000000f , 0.414214f },
         { 0.335425f , 0.809787f },
         { 0.834089f , 0.834089f },
         { 1.143707f , 0.473739f },
@@ -748,19 +1045,101 @@ START_TEST (fftr_f_performs_32pt_recursive_DFT)
         { 0.422747f , -0.175108f },
         { -0.248303f , 0.248303f },
         { -0.515005f , 1.243333f },
-        { -0.000000f , 2.414214f },
+        { 0.000000f , 2.414214f },
         { 1.311956f , 3.167342f },
         { 3.013670f , 3.013670f },
         { 4.443241f , 1.840451f }
     };
     int i;
 
-    fftr_f(data, 5);  /* 5 = log2(32) */
+    fftr_f(data, 5, FFT_FORWARD);  /* 5 = log2(32) */
 
     for (i = 0; i < 32; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftr_f_performs_32pt_recursive_inverse_DFT)
+{
+    complex_f data[32] = {
+        { 5.000000f , 0.000000f },
+        { 4.443241f , -1.840451f },
+        { 3.013670f , -3.013670f },
+        { 1.311956f , -3.167342f },
+        { 0.000000f , -2.414214f },
+        { -0.515005f , -1.243333f },
+        { -0.248303f , -0.248303f },
+        { 0.422747f , 0.175108f },
+        { 1.000000f , 0.000000f },
+        { 1.143707f , -0.473739f },
+        { 0.834089f , -0.834089f },
+        { 0.335425f , -0.809787f },
+        { 0.000000f , -0.414214f },
+        { 0.039197f , 0.094631f },
+        { 0.400544f , 0.400544f },
+        { 0.818731f , 0.339130f },
+        { 1.000000f , 0.000000f },
+        { 0.818731f , -0.339130f },
+        { 0.400544f , -0.400544f },
+        { 0.039197f , -0.094631f },
+        { 0.000000f , 0.414214f },
+        { 0.335425f , 0.809787f },
+        { 0.834089f , 0.834089f },
+        { 1.143707f , 0.473739f },
+        { 1.000000f , 0.000000f },
+        { 0.422747f , -0.175108f },
+        { -0.248303f , 0.248303f },
+        { -0.515005f , 1.243333f },
+        { 0.000000f , 2.414214f },
+        { 1.311956f , 3.167342f },
+        { 3.013670f , 3.013670f },
+        { 4.443241f , 1.840451f }
+    };
+    complex_f expected_f_t_N[32] = {
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    int i;
+
+    fftr_f(data, 5, FFT_INVERSE);  /* 5 = log2(32) */
+
+    for (i = 0; i < 32; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -784,12 +1163,39 @@ START_TEST (fftrb_f_performs_4pt_recursive_DFT)
     complex_f scratch[4];
     int i;
 
-    fftrb_f(data, 2, scratch);  /* 2 = log2(4) */
+    fftrb_f(data, 2, FFT_FORWARD, scratch);  /* 2 = log2(4) */
 
     for (i = 0; i < 4; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftrb_f_performs_4pt_recursive_inverse_DFT)
+{
+    complex_f data[4] = {
+        { 10.0f , 0.0f },
+        { -2.0f , 2.0f },
+        { -2.0f , 0.0f },
+        { -2.0f , -2.0f }
+    };
+    complex_f expected_f_t_N[4] = {
+        { 4.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 12.0f , 0.0f },
+        { 16.0f , 0.0f }
+    };
+    complex_f scratch[4];
+    int i;
+
+    fftrb_f(data, 2, FFT_INVERSE, scratch);  /* 2 = log2(4) */
+
+    for (i = 0; i < 4; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -797,34 +1203,69 @@ END_TEST
 START_TEST (fftrb_f_performs_8pt_recursive_DFT)
 {
     complex_f data[8] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[8] = {
-        { 5.000000f , 0.000000f },
-        { 0.000000f , -2.414214f },
-        { 1.000000f , 0.000000f },
-        { 0.000000f , -0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 0.414214f },
-        { 1.000000f , 0.000000f },
-        { -0.000000f , 2.414214f }
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
     };
     complex_f scratch[8];
     int i;
 
-    fftrb_f(data, 3, scratch);  /* 3 = log2(8) */
+    fftrb_f(data, 3, FFT_FORWARD, scratch);  /* 3 = log2(8) */
 
     for (i = 0; i < 8; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftrb_f_performs_8pt_recursive_inverse_DFT)
+{
+    complex_f data[8] = {
+        { 5.0f , 0.000000f },
+        { 0.0f , -2.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , -0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 0.414214f },
+        { 1.0f , 0.000000f },
+        { 0.0f , 2.414214f }
+    };
+    complex_f expected_f_t_N[8] = {
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 8.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f scratch[8];
+    int i;
+
+    fftrb_f(data, 3, FFT_INVERSE, scratch);  /* 3 = log2(8) */
+
+    for (i = 0; i < 8; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -832,38 +1273,38 @@ END_TEST
 START_TEST (fftrb_f_performs_32pt_recursive_DFT)
 {
     complex_f data[32] = {
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 1.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f },
-        { 0.000000f , 0.0f }
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 1.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
     };
     complex_f expected_F_w[32] = {
         { 5.000000f , 0.000000f },
@@ -886,7 +1327,7 @@ START_TEST (fftrb_f_performs_32pt_recursive_DFT)
         { 0.818731f , -0.339130f },
         { 0.400544f , -0.400544f },
         { 0.039197f , -0.094631f },
-        { -0.000000f , 0.414214f },
+        { 0.000000f , 0.414214f },
         { 0.335425f , 0.809787f },
         { 0.834089f , 0.834089f },
         { 1.143707f , 0.473739f },
@@ -894,7 +1335,7 @@ START_TEST (fftrb_f_performs_32pt_recursive_DFT)
         { 0.422747f , -0.175108f },
         { -0.248303f , 0.248303f },
         { -0.515005f , 1.243333f },
-        { -0.000000f , 2.414214f },
+        { 0.000000f , 2.414214f },
         { 1.311956f , 3.167342f },
         { 3.013670f , 3.013670f },
         { 4.443241f , 1.840451f }
@@ -902,12 +1343,96 @@ START_TEST (fftrb_f_performs_32pt_recursive_DFT)
     complex_f scratch[32];
     int i;
 
-    fftrb_f(data, 5, scratch);  /* 5 = log2(32) */
+    fftrb_f(data, 5, FFT_FORWARD, scratch);  /* 5 = log2(32) */
 
     for (i = 0; i < 32; i++)
     {
-        ck_assert_flt_eq(data[i].re, expected_F_w[i].re);
-        ck_assert_flt_eq(data[i].im, expected_F_w[i].im);
+        ck_assert_flt_eq_eps(data[i].re, expected_F_w[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_F_w[i].im, FLOAT_EQ_TOLERANCE);
+    }
+}
+END_TEST
+
+START_TEST (fftrb_f_performs_32pt_recursive_inverse_DFT)
+{
+
+    complex_f data[32] = {
+        { 5.000000f , 0.000000f },
+        { 4.443241f , -1.840451f },
+        { 3.013670f , -3.013670f },
+        { 1.311956f , -3.167342f },
+        { 0.000000f , -2.414214f },
+        { -0.515005f , -1.243333f },
+        { -0.248303f , -0.248303f },
+        { 0.422747f , 0.175108f },
+        { 1.000000f , 0.000000f },
+        { 1.143707f , -0.473739f },
+        { 0.834089f , -0.834089f },
+        { 0.335425f , -0.809787f },
+        { 0.000000f , -0.414214f },
+        { 0.039197f , 0.094631f },
+        { 0.400544f , 0.400544f },
+        { 0.818731f , 0.339130f },
+        { 1.000000f , 0.000000f },
+        { 0.818731f , -0.339130f },
+        { 0.400544f , -0.400544f },
+        { 0.039197f , -0.094631f },
+        { 0.000000f , 0.414214f },
+        { 0.335425f , 0.809787f },
+        { 0.834089f , 0.834089f },
+        { 1.143707f , 0.473739f },
+        { 1.000000f , 0.000000f },
+        { 0.422747f , -0.175108f },
+        { -0.248303f , 0.248303f },
+        { -0.515005f , 1.243333f },
+        { 0.000000f , 2.414214f },
+        { 1.311956f , 3.167342f },
+        { 3.013670f , 3.013670f },
+        { 4.443241f , 1.840451f }
+    };
+    complex_f expected_f_t_N[32] = {
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 32.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f },
+        { 0.0f , 0.0f }
+    };
+    complex_f scratch[32];
+    int i;
+
+    fftrb_f(data, 5, FFT_INVERSE, scratch);  /* 5 = log2(32) */
+
+    for (i = 0; i < 32; i++)
+    {
+        ck_assert_flt_eq_eps(data[i].re, expected_f_t_N[i].re, FLOAT_EQ_TOLERANCE);
+        ck_assert_flt_eq_eps(data[i].im, expected_f_t_N[i].im, FLOAT_EQ_TOLERANCE);
     }
 }
 END_TEST
@@ -933,19 +1458,30 @@ Suite * unit_test_suite(void)
     tcase_add_test(tc_core, ffti_copy_shuffle_f_copies_sixteen_shuffled_values);
 
     tcase_add_test(tc_core, ffti_evaluate_f_performs_8pt_dft);
+    tcase_add_test(tc_core, ffti_evaluate_f_performs_8pt_inverse_dft);
     tcase_add_test(tc_core, ffti_evaluate_f_performs_16pt_dft);
+    tcase_add_test(tc_core, ffti_evaluate_f_performs_16pt_inverse_dft);
 
     tcase_add_test(tc_core, ffti_f_performs_4pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_4pt_inplace_inverse_DFT);
     tcase_add_test(tc_core, ffti_f_performs_8pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_8pt_inplace_inverse_DFT);
     tcase_add_test(tc_core, ffti_f_performs_32pt_inplace_DFT);
+    tcase_add_test(tc_core, ffti_f_performs_32pt_inplace_inverse_DFT);
 
     tcase_add_test(tc_core, fftr_f_performs_4pt_recursive_DFT);
+    tcase_add_test(tc_core, fftr_f_performs_4pt_recursive_inverse_DFT);
     tcase_add_test(tc_core, fftr_f_performs_8pt_recursive_DFT);
+    tcase_add_test(tc_core, fftr_f_performs_8pt_recursive_inverse_DFT);
     tcase_add_test(tc_core, fftr_f_performs_32pt_recursive_DFT);
+    tcase_add_test(tc_core, fftr_f_performs_32pt_recursive_inverse_DFT);
 
     tcase_add_test(tc_core, fftrb_f_performs_4pt_recursive_DFT);
+    tcase_add_test(tc_core, fftrb_f_performs_4pt_recursive_inverse_DFT);
     tcase_add_test(tc_core, fftrb_f_performs_8pt_recursive_DFT);
+    tcase_add_test(tc_core, fftrb_f_performs_8pt_recursive_inverse_DFT);
     tcase_add_test(tc_core, fftrb_f_performs_32pt_recursive_DFT);
+    tcase_add_test(tc_core, fftrb_f_performs_32pt_recursive_inverse_DFT);
 
     suite_add_tcase(s, tc_core);
 
