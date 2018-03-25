@@ -16,7 +16,7 @@ COMPONENT_LIBS = $(foreach dir, $(COMPONENT_DIRS), $(dir)/$(dir).a)
 
 CFLAGS += $(addprefix -I, $(COMPONENT_DIRS))
 
-.PHONY: default force all tests alltests runtests runalltests runmemtests runallmemtests clean clobber
+.PHONY: default force all tests alltests runtests runalltests runmemtests runallmemtests clean clobber help
 
 default: $(EXE)
 
@@ -64,5 +64,21 @@ clobber:
 	rm -f foo.bar
 	rm -f $(APP_LIB) $(EXE) $(APP_TEST_EXES)
 	@for d in $(COMPONENT_DIRS); do (cd $$d; $(MAKE) clobber ); done
+
+help:
+	@echo "default: $(EXE)"
+	@echo "$(EXE): make the application executable, making library components if needed"
+	@echo "$(APP_LIB): make the app library"
+	@for d in $(COMPONENT_DIRS); do (echo "$$d.a: make the $$d library" ); done
+	@for e in $(APP_TEST_EXES); do (echo "$$e: make the $$e test runner" ); done
+	@echo "all: make the app and lib components, and all test runners"
+	@echo "tests: make all app test runner(s): $(APP_TEST_EXES)"
+	@echo "alltests: make all app and library test runners"
+	@echo "runtests: run all app test runner(s), making them if needed"
+	@echo "runalltests: run all app and library test runners, making them if needed"
+	@echo "runmemtests: run all app test runner(s), checking for leaks"
+	@echo "runallmemtests: run all app and library test runner(s), checking for leaks"
+	@echo "clean: all delete object files and debug files"
+	@echo "clobber: delete all object files, debug files, exe files, and library files"
 
 -include $(wildcard *.d)
