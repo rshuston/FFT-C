@@ -52,7 +52,7 @@ void ffti_copy_shuffle_f(complex_f src[], complex_f dst[], unsigned log2_N)
          * Use division to bit-reverse the single bit so that we now have
          * the most significant zero bit
          *
-         * N = 2^r = 2^(2m)
+         * N = 2^r = 2^(m+1)
          * Nd2 = N/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
          *     mszb = Nd2 / lszb
@@ -111,7 +111,7 @@ void ffti_shuffle_f(complex_f data[], unsigned log2_N)
          * Use division to bit-reverse the single bit so that we now have
          * the most significant zero bit
          *
-         * N = 2^r = 2^(2m)
+         * N = 2^r = 2^(m+1)
          * Nd2 = N/2 = 2^m
          * if lszb = 2^k, where k is within the range of 0...m, then
          *     mszb = Nd2 / lszb
