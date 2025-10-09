@@ -1,7 +1,7 @@
-CC = gcc
-CFLAGS = -g -Wall
+CC = cc
+CFLAGS = -g
 
-LD = gcc
+LD = cc
 LDFLAGS = -lm
 TEST_LDFLAGS =
 
