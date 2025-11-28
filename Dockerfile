@@ -14,4 +14,4 @@ RUN useradd -m frodo && echo "frodo:baggins" | chpasswd && usermod -aG sudo frod
 
 USER frodo
 WORKDIR /home/frodo
-CMD /bin/bash
+CMD ["/bin/bash"]
